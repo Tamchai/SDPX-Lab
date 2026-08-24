@@ -28,3 +28,10 @@ Date: 2026-08-24
 ## AI Tools
 - Agent ที่ใช้: [ระบุ]
 - Review policy: ทุก AI-generated code ต้องอ่านและอธิบายได้ก่อน commit
+
+## Deployment
+- Platform: Render (backend) + Vercel (frontend)
+- Staging URL: 
+  - Backend: https://sdpx-lab-backend.onrender.com
+  - Frontend: https://sdpx-lab-xxx.vercel.app
+- Commit-to-live time: [จะวัดในขั้นตอนถัดไป]
