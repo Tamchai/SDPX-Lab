@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+node_modules/
+__pycache__/
+.venv/
+.next/
+dist/
+build/
+coverage/
+playwright-report/
+test-results/
+*.log
+.DS_Store
