@@ -6,7 +6,7 @@ flowchart LR
     FE -->|REST /api| API[FastAPI App<br/>hosted on Render]
     API --> SVC[Booking Service<br/>business logic]
     SVC --> REPO[(PostgreSQL<br/>User / Room / Booking)]
-    API -.->|planned| AUTH[Auth Provider]
+    API -->|verify JWT| AUTH[Auth Unit<br/>email + password, JWT]
 ```
 
 ## รายละเอียด
@@ -18,9 +18,12 @@ flowchart LR
 | FastAPI App | Python 3.12 | รับ request จาก frontend, มี `/api/health` แล้ว, endpoint อื่นจะออกแบบใน WS-02 |
 | Booking Service | ภายใน FastAPI App | business logic การจอง (สร้าง/ยกเลิก, เช็คห้องว่าง) |
 | PostgreSQL | Docker (dev) | เก็บข้อมูล User, Room, Booking |
-| Auth Provider | ยังไม่ตัดสินใจ | การยืนยันตัวตนนักศึกษา — **คำถามที่ยังตอบไม่ได้ ดู spec-questions.md** |
+| Auth Unit | ภายใน FastAPI App | ยืนยันตัวตนด้วย email/password และออก JWT — รายละเอียดดู `memory-bank/units/auth/unit-brief.md` |
 
 ## หมายเหตุ
 
-- Diagram นี้เป็นฉบับร่างจาก WS-02--before จะขัดเกลาเพิ่มใน WS-02 Lab (ขั้นตอนที่ 2)
-- เส้นประ (`-.->`) หมายถึงส่วนที่ยังไม่ได้ implement จริง เป็นแผนที่วางไว้เท่านั้น
+- Diagram นี้ขัดเกลาแล้วใน WS-02 Lab (ขั้นตอนที่ 2) จากฉบับร่างของ WS-02--before
+- แต่ละ box ฝั่ง backend (Booking Service, Room Catalog — ไม่ได้วาดแยกในนี้เพื่อความกระชับ, Auth Unit)
+  ตรงกับ unit brief หนึ่งไฟล์ใน `memory-bank/units/` — ดูรายละเอียดความรับผิดชอบและกฎธุรกิจที่นั่น
+- Endpoint ทั้งหมดที่ API รองรับ ดู `docs/openapi.yaml`; ER ของข้อมูลที่เก็บใน PostgreSQL ดู
+  `docs/erd.md`

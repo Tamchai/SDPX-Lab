@@ -21,17 +21,13 @@ Date: 2026-08-24
 - Rationale: รองรับ relational data (User–Room–Booking) และใช้ฝึก Docker ตาม WS-01--before
 
 ## Deployment
-- Platform: Render (FastAPI backend) + Vercel (React frontend) หรือ Render สำหรับทั้งคู่
-- Staging URL: [จะเพิ่มหลัง deploy]
-- Commit-to-live time: [จะวัดในขั้นตอนที่ 5]
+- Platform: Render (FastAPI backend) + Vercel (React frontend)
+- Staging URL:
+  - Backend: https://sdpx-lab-backend.onrender.com (health check: `/api/health`)
+  - Frontend: https://sdpx-lab.vercel.app
+- Auto-deploy: ทั้งสอง platform build อัตโนมัติทุกครั้งที่ push เข้า `develop` (ยืนยันจาก deployment history — ไม่ต้องกดปุ่มเอง)
+- Commit-to-live time: [จะวัดตามขั้นตอนที่ 5 ของ WS-01 lab — แก้ headline, commit, push, จับเวลาให้ URL จริงอัปเดต]
 
 ## AI Tools
 - Agent ที่ใช้: [ระบุ]
 - Review policy: ทุก AI-generated code ต้องอ่านและอธิบายได้ก่อน commit
-
-## Deployment
-- Platform: Render (backend) + Vercel (frontend)
-- Staging URL: 
-  - Backend: https://sdpx-lab-backend.onrender.com
-  - Frontend: https://sdpx-lab-xxx.vercel.app
-- Commit-to-live time: [จะวัดในขั้นตอนถัดไป]

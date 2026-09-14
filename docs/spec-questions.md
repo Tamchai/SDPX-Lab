@@ -12,6 +12,17 @@ Acceptance Criteria — ถ้าไม่ตอบเอง AI จะเดา�
 ## 3. นักศึกษา 1 คนจองพร้อมกันได้กี่ห้อง/กี่ slot ต่อวัน?
 มีลิมิตกันไม่ให้คนเดียวยึดห้องรวบหมดไหม (เช่น จองซ้อนกันได้สูงสุดกี่ booking ที่ยัง active อยู่)?
 
+## คำตอบ (ตัดสินใจใน WS-02 Lab)
+
+| คำถาม | คำตอบ |
+|---|---|
+| 1. จองล่วงหน้าได้กี่วัน? | ไม่เกิน 14 วัน |
+| 2. ยกเลิกได้ถึงเมื่อไหร่? | ต้องยกเลิกก่อนเวลาเริ่มอย่างน้อย 1 ชั่วโมง |
+| 3. จองพร้อมกันได้กี่ booking? | active booking สูงสุด 3 รายการต่อคน |
+
+รายละเอียดและเหตุผลอยู่ใน `memory-bank/intent.md` (section *Decisions Already Made*)
+ค่าทั้งหมดนี้เป็นการตัดสินใจแทน stakeholder จริงเนื่องจากเป็น course exercise — นำไปใช้เขียน
+acceptance criteria ใน `docs/backlog.md` และ endpoint validation ใน `docs/openapi.yaml` แล้ว
+
 ## สถานะ
-รอคำตอบจาก stakeholder ใน WS-02 Lab — คำถามเหล่านี้จะใช้ปิดช่องว่างก่อนเขียน
-user stories และ acceptance criteria ในขั้นตอนที่ 1 ของ Lab
+ตอบครบแล้ว — ปิด (closed) ณ WS-02 Lab

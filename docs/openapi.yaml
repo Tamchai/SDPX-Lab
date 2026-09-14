@@ -1,0 +1,327 @@
+openapi: 3.1.0
+info:
+  title: Room Booking API
+  version: 0.1.0
+  description: |
+    API สำหรับระบบจองห้องเรียน/ห้องประชุมของนักศึกษา
+    ทุก endpoint ที่นี่สืบกลับไปหา user story ใน docs/backlog.md ได้ — ไม่มี endpoint
+    ที่ไม่มี story รองรับ
+  license:
+    name: UNLICENSED
+servers:
+  - url: /api
+
+tags:
+  - name: auth
+    description: Unit auth — memory-bank/units/auth/unit-brief.md
+  - name: rooms
+    description: Unit room-catalog — memory-bank/units/room-catalog/unit-brief.md
+  - name: bookings
+    description: Unit booking — memory-bank/units/booking/unit-brief.md
+  - name: system
+    description: Health check และ endpoint ที่ไม่ผูกกับ business unit ใดโดยตรง
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [system]
+      operationId: getHealth
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: ok
+        "503":
+          description: Service is down or a dependency (e.g. database) is unreachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      summary: เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน
+      description: Story US-1
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: เข้าสู่ระบบสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: อีเมลหรือรหัสผ่านไม่ถูกต้อง
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /rooms:
+    get:
+      tags: [rooms]
+      operationId: listRooms
+      summary: ดูรายการห้องที่เปิดใช้งาน
+      description: Story US-2
+      responses:
+        "200":
+          description: รายการห้อง
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /bookings:
+    post:
+      tags: [bookings]
+      operationId: createBooking
+      summary: สร้างการจองห้องใหม่
+      description: >
+        Stories US-3 (happy path), US-6 (ชนกับ booking อื่น → 409),
+        US-7 (นอกช่วงเวลาที่อนุญาต → 400/422), US-8 (เกิน active booking limit → 409)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookingRequest"
+      responses:
+        "201":
+          description: จองสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "400":
+          description: ช่วงเวลาไม่ถูกต้อง (เช่น end_at <= start_at, จองย้อนหลัง)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: ไม่พบห้องที่ขอจอง (room id ไม่มีอยู่จริงหรือถูกปิดใช้งาน)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: >
+            ห้องไม่ว่างในช่วงเวลาที่ขอ (US-6) หรือผู้ใช้มี active booking ครบ 3
+            รายการแล้ว (US-8)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /bookings/me:
+    get:
+      tags: [bookings]
+      operationId: listMyBookings
+      summary: ดูรายการจองของตัวเอง
+      description: Story US-4
+      responses:
+        "200":
+          description: รายการ booking ของผู้ใช้ปัจจุบัน เรียงตาม start_at
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /bookings/{bookingId}:
+    parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    delete:
+      tags: [bookings]
+      operationId: cancelBooking
+      summary: ยกเลิกการจองของตัวเอง
+      description: >
+        Stories US-5 (happy path + เจ้าของเท่านั้น → 403), US-9 (ยกเลิกกระชั้นชิดเกินไป → 409)
+      responses:
+        "204":
+          description: ยกเลิกสำเร็จ ไม่มี response body
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: booking นี้ไม่ใช่ของผู้ใช้ปัจจุบัน (US-5)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: ไม่พบ booking ตาม id ที่ระบุ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: เหลือเวลาน้อยกว่า 1 ชั่วโมงก่อนเริ่ม ยกเลิกไม่ได้แล้ว (US-9)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: คำขอไม่ถูกต้อง
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: ไม่ได้เข้าสู่ระบบ หรือ token ไม่ถูกต้อง/หมดอายุ
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ValidationError:
+      description: ข้อมูลที่ส่งมาไม่ผ่าน schema validation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: ROOM_NOT_AVAILABLE
+            message:
+              type: string
+              example: ห้องนี้ถูกจองแล้วในช่วงเวลาที่เลือก
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+
+    LoginResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, email, fullName]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+
+    Room:
+      type: object
+      required: [id, name, building, capacity]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          example: A101
+        building:
+          type: string
+          example: อาคาร A
+        capacity:
+          type: integer
+          example: 10
+
+    CreateBookingRequest:
+      type: object
+      required: [roomId, startAt, endAt]
+      properties:
+        roomId:
+          type: integer
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+
+    Booking:
+      type: object
+      required: [id, roomId, userId, startAt, endAt, status]
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        userId:
+          type: integer
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [confirmed, cancelled]
