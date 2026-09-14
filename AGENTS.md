@@ -8,9 +8,10 @@
 - install (frontend): `npm ci`
 - dev (backend): `uvicorn main:app --reload`
 - dev (frontend): `npm run dev`
-- test (backend): `pytest`
+- test (backend): `pytest` (run inside `backend/`; add `--cov=. --cov-report=html:../docs/coverage` for a coverage report)
 - test (frontend): `npm test`
-- lint (backend): `ruff check .`
+- test (e2e): `npm run test:e2e` (run from repo root — starts frontend+backend automatically)
+- lint (backend): `ruff check .` (run inside `backend/`)
 - lint (frontend): `npm run lint`
 - build (frontend): `npm run build`
 

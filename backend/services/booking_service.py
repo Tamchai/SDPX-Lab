@@ -51,7 +51,7 @@ class BookingService:
             raise RoomNotFoundError(f"room {room_id} not found")
 
         if self._booking_repo.find_overlapping(room_id, start_at, end_at):
-            raise RoomNotAvailableError("room is already booked for this time range")
+            raise RoomNotAvailableError("this room is not available for the selected time")
 
         if (
             self._booking_repo.count_active_for_user(user_id, now)
