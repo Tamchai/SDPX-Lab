@@ -194,6 +194,14 @@ read-then-write ธรรมดา ต้องตัดสินใจว่า
 application-level lock — ตัดสินใจตอนออกแบบ `booking` unit (ดู
 `memory-bank/units/booking/unit-brief.md`)
 
+### TD-2: ต่อ persistence จาก in-memory ไปยัง Postgres จริง
+**Label:** `tech-debt`
+
+`compose.yaml`/`compose.test.yaml` (WS-05) ตั้ง Postgres container และ `DATABASE_URL` ไว้แล้ว
+แต่ `backend/repositories.py` ยังเก็บข้อมูลแบบ in-memory (`InMemoryRoomRepository` ฯลฯ) — ข้อมูล
+หายทุกครั้งที่ container restart ต้องตัดสินใจว่าจะใช้ ORM ไหน (SQLAlchemy) และ migration tool ไหน
+ก่อนต่อจริง
+
 ---
 
 ## วิธีสร้างเป็น GitHub Issues จริง

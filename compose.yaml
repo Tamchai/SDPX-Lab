@@ -1,0 +1,52 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: build # dev uses the stage with devDependencies (pytest, ruff)
+    ports:
+      - "8000:8000"
+    environment:
+      ENV: development
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me}
+      FRONTEND_ORIGIN: http://localhost:5173
+      # Not consumed by the app yet (it's still in-memory — see docs/backlog.md TD-2);
+      # provisioned here so the wiring is a one-line change when that lands.
+      DATABASE_URL: ${DATABASE_URL:-postgres://user:pass@db:5432/appdb}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      target: build
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # don't let the bind mount hide the image's node_modules
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d appdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # exposed for local database tools
+
+volumes:
+  postgres_data:

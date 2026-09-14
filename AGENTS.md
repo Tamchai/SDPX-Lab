@@ -4,7 +4,16 @@
 ระบบจองห้องเรียน/ห้องประชุมสำหรับนักศึกษาในมหาวิทยาลัย — รายละเอียดดู memory-bank/intent.md
 
 ## Setup & Commands
-- install (backend): `pip install -r requirements.txt`
+
+### Docker (preferred — no local Python/Node setup needed)
+- dev (app + db):    `docker compose up`
+- unit test:         `docker compose -f compose.test.yaml up unit --abort-on-container-exit --exit-code-from unit`
+- e2e test:          `docker compose -f compose.test.yaml --profile e2e up e2e --abort-on-container-exit --exit-code-from e2e`
+- teardown:          `docker compose -f compose.test.yaml down -v`
+
+### Local (without Docker)
+- install (backend, runtime only): `pip install -r requirements.txt`
+- install (backend, dev/test): `pip install -r requirements-dev.txt`
 - install (frontend): `npm ci`
 - dev (backend): `uvicorn main:app --reload`
 - dev (frontend): `npm run dev`
